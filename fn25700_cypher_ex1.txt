@@ -10,6 +10,9 @@ RETURN prsn
 MATCH (keanu {name:"Keanu Reeves"})-[:ACTED_IN]->(keanuMovies)
 RETURN keanu, keanuMovies
 
+MATCH (keanu:Person {name:"Keanu Reeves"})-[:ACTED_IN]->(movies)<-[:ACTED_IN]-(coActors)
+return coActors.name
+
 match (prsn:Person)-[:DIRECTED]-(movies)
 where movies.title = "The Matrix"
 return prsn
@@ -17,3 +20,14 @@ return prsn
 MATCH (prsn:Person)-[:ACTED_IN]-(movie)
 WHERE movie.title = "Top Gun"
 return prsn
+
+MATCH (directors:Person)-[:DIRECTED]-(movie:Movie)
+WHERE movie.released >= 1985 AND movie.released <= 2001
+RETURN directors.name
+
+MATCH p=shortestPath((keanu:Person {name:"Keanu Reeves"})-[*]-(tom:Person {name:"Tom Cruise"}))
+RETURN p
+
+MATCH p=(movie:Movie {title:"The Matrix"})-[:ACTED_IN|:DIRECTED*2]-()
+RETURN p LIMIT 20
+
