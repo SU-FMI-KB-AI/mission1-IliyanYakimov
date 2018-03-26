@@ -1,0 +1,19 @@
+MATCH (movie:Movie {released:1997})
+return movie
+
+MATCH (keanu {name:"Keanu Reeves"})
+RETURN keanu
+
+MATCH (prsn {born:1967})
+RETURN prsn
+
+MATCH (keanu {name:"Keanu Reeves"})-[:ACTED_IN]->(keanuMovies)
+RETURN keanu, keanuMovies
+
+match (prsn:Person)-[:DIRECTED]-(movies)
+where movies.title = "The Matrix"
+return prsn
+
+MATCH (prsn:Person)-[:ACTED_IN]-(movie)
+WHERE movie.title = "Top Gun"
+return prsn
