@@ -31,3 +31,54 @@ RETURN p
 MATCH p=(movie:Movie {title:"The Matrix"})-[:ACTED_IN|:DIRECTED*2]-()
 RETURN p LIMIT 20
 
+// content-based filtering
+MATCH (m:Movie)<-[:RATED]-(u:User)
+WHERE m.title CONTAINS "The"
+WITH m.title AS movie, COUNT(*) AS reviews
+RETURN movie, reviews
+ORDER BY reviews DESC
+LIMIT 10
+
+// collaborative Filtering
+MATCH (m:Movie {title: "Matrix, The"})<-[:RATED]-(u:User)-[:RATED]->(rec:Movie)
+RETURN rec.title AS recommendation, COUNT(*) AS usersWhoAlsoWatched
+ORDER BY usersWhoAlsoWatched DESC LIMIT 25
+
+// content-based filtering based on common genres
+MATCH (m:Movie)-[:IN_GENRE]->(g:Genre)<-[:IN_GENRE]-(rec:Movie)
+WHERE m.title = "Matrix, The"
+WITH rec, COLLECT(g.name) AS genres, COUNT(*) AS commonGenres
+RETURN rec.title, genres, commonGenres
+ORDER BY commonGenres DESC LIMIT 20;
+
+MATCH (u)-[:RATED]->(m:Movie)
+RETURN u LIMIT 20
+
+MATCH (u)-[:RATED]->(m:Movie)
+WHERE m.title = "Matrix, The"
+RETURN u LIMIT 20 
+// one of them is Glenn Mitchell
+
+//all ratings by Glenn Mitchell
+MATCH (u {name:"Glenn Mitchell"})
+MATCH (u)-[r:RATED]->(m:Movie)
+RETURN *
+
+// all ratings in pairs (movie title, rating)
+MATCH (u {name:"Glenn Mitchell"})
+MATCH (u)-[r:RATED]->(m:Movie)
+RETURN m.title ,r.rating
+
+// average rating by Glenn Mitchell
+MATCH (u {name:"Glenn Mitchell"})
+MATCH (u)-[r:RATED]->(m:Movie)
+RETURN AVG(r.rating) as averageRating
+
+// movies that Glenn liked with bigger rating than average rating
+MATCH (u {name:"Glenn Mitchell"})
+MATCH (u)-[r:RATED]->(m:Movie)
+WITH u, AVG(r.rating) as average
+MATCH (u)-[r:RATED]->(m)
+WHERE r.rating > average
+RETURN *
+//RETURN r.rating
